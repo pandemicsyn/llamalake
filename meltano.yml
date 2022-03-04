@@ -1,0 +1,25 @@
+version: 1
+send_anonymous_usage_stats: false
+
+plugins:
+  extractors:
+  - name: tap-gitlab
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-gitlab.git
+    config:
+      projects: meltano/meltano
+      start_date: '2022-01-01T00:00:00Z'
+    select:
+    - commits.*
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
+
+environments:
+- name: prod
+  env:
+    CUSTOM: prod
+- name: dev
+  env:
+    CUSTOM: dev

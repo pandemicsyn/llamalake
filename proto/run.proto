@@ -1,0 +1,15 @@
+syntax = "proto3";
+package gr;
+
+service Run{
+ rpc Submit(Command) returns (MessageResponse) {}
+}
+
+message Command{
+ string message = 1;
+}
+
+message MessageResponse{
+ string message = 1;
+ bool submitted = 2;
+}

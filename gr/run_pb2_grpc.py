@@ -5,7 +5,7 @@ import grpc
 import run_pb2 as run__pb2
 
 
-class UnaryStub(object):
+class RunStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -14,69 +14,53 @@ class UnaryStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetServerResponse = channel.unary_unary(
-            "/unary.Unary/GetServerResponse",
-            request_serializer=run__pb2.Message.SerializeToString,
-            response_deserializer=run__pb2.MessageResponse.FromString,
-        )
+        self.Submit = channel.unary_unary(
+                '/gr.Run/Submit',
+                request_serializer=run__pb2.Command.SerializeToString,
+                response_deserializer=run__pb2.MessageResponse.FromString,
+                )
 
 
-class UnaryServicer(object):
+class RunServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetServerResponse(self, request, context):
-        """A simple RPC.
-
-        Obtains the MessageResponse at a given position.
-        """
+    def Submit(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
-def add_UnaryServicer_to_server(servicer, server):
+def add_RunServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "GetServerResponse": grpc.unary_unary_rpc_method_handler(
-            servicer.GetServerResponse,
-            request_deserializer=run__pb2.Message.FromString,
-            response_serializer=run__pb2.MessageResponse.SerializeToString,
-        ),
+            'Submit': grpc.unary_unary_rpc_method_handler(
+                    servicer.Submit,
+                    request_deserializer=run__pb2.Command.FromString,
+                    response_serializer=run__pb2.MessageResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "unary.Unary", rpc_method_handlers
-    )
+            'gr.Run', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
-# This class is part of an EXPERIMENTAL API.
-class Unary(object):
+ # This class is part of an EXPERIMENTAL API.
+class Run(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetServerResponse(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def Submit(request,
             target,
-            "/unary.Unary/GetServerResponse",
-            run__pb2.Message.SerializeToString,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/gr.Run/Submit',
+            run__pb2.Command.SerializeToString,
             run__pb2.MessageResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -7,27 +7,26 @@ import run_pb2_grpc as pb2_grpc
 import run_pb2 as pb2
 
 
-class UnaryService(pb2_grpc.UnaryServicer):
-    def __init__(self, *args, **kwargs):
-        pass
+class RunService(pb2_grpc.RunServicer):
 
-    def GetServerResponse(self, request, context):
-
-        # get the string from the incoming request
-        message = request.message
-        result = f'Hello I am up and running received "{message}" message from you'
-        result = {"message": result, "received": True}
-
-        return pb2.MessageResponse(**result)
+    async def Submit(self, request: pb2.Command, context: grpc.aio.ServicerContext) -> pb2.MessageResponse:
+        return pb2.MessageResponse(
+            message='would execute' % request.message,
+            received=True,
+        )
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
-    pb2_grpc.add_UnaryServicer_to_server(UnaryService(), server)
-    server.add_insecure_port("[::]:50051")
-    server.start()
-    server.wait_for_termination()
+async def serve() -> None:
+    server = grpc.aio.server()
+
+    pb2_grpc.add_RunServicer_to_server(RunService(), server)
+    listen_addr = '[::]:50051'
+    server.add_insecure_port(listen_addr)
+    logging.info("Starting server on %s", listen_addr)
+    await server.start()
+    await server.wait_for_termination()
 
 
-if __name__ == "__main__":
-    serve()
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(serve())
