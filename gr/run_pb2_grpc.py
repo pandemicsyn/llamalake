@@ -15,10 +15,10 @@ class RunStub(object):
             channel: A grpc.Channel.
         """
         self.Submit = channel.unary_unary(
-            "/gr.Run/Submit",
-            request_serializer=run__pb2.Command.SerializeToString,
-            response_deserializer=run__pb2.MessageResponse.FromString,
-        )
+                '/gr.Run/Submit',
+                request_serializer=run__pb2.Command.SerializeToString,
+                response_deserializer=run__pb2.Result.FromString,
+                )
 
 
 class RunServicer(object):
@@ -27,53 +27,40 @@ class RunServicer(object):
     def Submit(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_RunServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "Submit": grpc.unary_unary_rpc_method_handler(
-            servicer.Submit,
-            request_deserializer=run__pb2.Command.FromString,
-            response_serializer=run__pb2.MessageResponse.SerializeToString,
-        ),
+            'Submit': grpc.unary_unary_rpc_method_handler(
+                    servicer.Submit,
+                    request_deserializer=run__pb2.Command.FromString,
+                    response_serializer=run__pb2.Result.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "gr.Run", rpc_method_handlers
-    )
+            'gr.Run', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class Run(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Submit(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def Submit(request,
             target,
-            "/gr.Run/Submit",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/gr.Run/Submit',
             run__pb2.Command.SerializeToString,
-            run__pb2.MessageResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            run__pb2.Result.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

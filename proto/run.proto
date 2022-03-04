@@ -2,14 +2,20 @@ syntax = "proto3";
 package gr;
 
 service Run{
- rpc Submit(Command) returns (MessageResponse) {}
+ rpc Submit(Command) returns (Result) {}
 }
 
 message Command{
- string message = 1;
+ string blocks = 1;
+ bool full_refresh = 2;
+ bool force = 3;
+}
+message Result{
+ repeated Job jobs = 2;
 }
 
-message MessageResponse{
- string message = 1;
- bool submitted = 2;
+message Job{
+ int64 id = 1;
+ string job_id = 2;
+ string state = 3;
 }

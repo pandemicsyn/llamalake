@@ -15,6 +15,27 @@ plugins:
   - name: target-jsonl
     variant: andyh1203
     pip_url: target-jsonl
+  mappers:
+  - name: transform-field
+    variant: transferwise
+    pip_url: pipelinewise-transform-field
+    executable: transform-field
+    mappings:
+    - name: hide-gitlab-secrets
+      config:
+        transformations:
+        - field_id: author_email
+          tap_stream_name: commits
+          type: MASK-HIDDEN
+        - field_id: committer_email
+          tap_stream_name: commits
+          type: MASK-HIDDEN
+    - name: who-needs-ids
+      config:
+        transformations:
+        - field_id: id
+          tap_stream_name: commits
+          type: SET-NULL
 
 environments:
 - name: prod

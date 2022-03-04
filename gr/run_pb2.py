@@ -7,49 +7,51 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\trun.proto\x12\x02gr"\x1a\n\x07\x43ommand\x12\x0f\n\x07message\x18\x01 \x01(\t"5\n\x0fMessageResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tsubmitted\x18\x02 \x01(\x08\x32\x33\n\x03Run\x12,\n\x06Submit\x12\x0b.gr.Command\x1a\x13.gr.MessageResponse"\x00\x62\x06proto3'
-)
 
 
-_COMMAND = DESCRIPTOR.message_types_by_name["Command"]
-_MESSAGERESPONSE = DESCRIPTOR.message_types_by_name["MessageResponse"]
-Command = _reflection.GeneratedProtocolMessageType(
-    "Command",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _COMMAND,
-        "__module__": "run_pb2"
-        # @@protoc_insertion_point(class_scope:gr.Command)
-    },
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\trun.proto\x12\x02gr\">\n\x07\x43ommand\x12\x0e\n\x06\x62locks\x18\x01 \x01(\t\x12\x14\n\x0c\x66ull_refresh\x18\x02 \x01(\x08\x12\r\n\x05\x66orce\x18\x03 \x01(\x08\"\x1f\n\x06Result\x12\x15\n\x04jobs\x18\x02 \x03(\x0b\x32\x07.gr.Job\"0\n\x03Job\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0e\n\x06job_id\x18\x02 \x01(\t\x12\r\n\x05state\x18\x03 \x01(\t2*\n\x03Run\x12#\n\x06Submit\x12\x0b.gr.Command\x1a\n.gr.Result\"\x00\x62\x06proto3')
+
+
+
+_COMMAND = DESCRIPTOR.message_types_by_name['Command']
+_RESULT = DESCRIPTOR.message_types_by_name['Result']
+_JOB = DESCRIPTOR.message_types_by_name['Job']
+Command = _reflection.GeneratedProtocolMessageType('Command', (_message.Message,), {
+  'DESCRIPTOR' : _COMMAND,
+  '__module__' : 'run_pb2'
+  # @@protoc_insertion_point(class_scope:gr.Command)
+  })
 _sym_db.RegisterMessage(Command)
 
-MessageResponse = _reflection.GeneratedProtocolMessageType(
-    "MessageResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _MESSAGERESPONSE,
-        "__module__": "run_pb2"
-        # @@protoc_insertion_point(class_scope:gr.MessageResponse)
-    },
-)
-_sym_db.RegisterMessage(MessageResponse)
+Result = _reflection.GeneratedProtocolMessageType('Result', (_message.Message,), {
+  'DESCRIPTOR' : _RESULT,
+  '__module__' : 'run_pb2'
+  # @@protoc_insertion_point(class_scope:gr.Result)
+  })
+_sym_db.RegisterMessage(Result)
 
-_RUN = DESCRIPTOR.services_by_name["Run"]
+Job = _reflection.GeneratedProtocolMessageType('Job', (_message.Message,), {
+  'DESCRIPTOR' : _JOB,
+  '__module__' : 'run_pb2'
+  # @@protoc_insertion_point(class_scope:gr.Job)
+  })
+_sym_db.RegisterMessage(Job)
+
+_RUN = DESCRIPTOR.services_by_name['Run']
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    _COMMAND._serialized_start = 17
-    _COMMAND._serialized_end = 43
-    _MESSAGERESPONSE._serialized_start = 45
-    _MESSAGERESPONSE._serialized_end = 98
-    _RUN._serialized_start = 100
-    _RUN._serialized_end = 151
+  DESCRIPTOR._options = None
+  _COMMAND._serialized_start=17
+  _COMMAND._serialized_end=79
+  _RESULT._serialized_start=81
+  _RESULT._serialized_end=112
+  _JOB._serialized_start=114
+  _JOB._serialized_end=162
+  _RUN._serialized_start=164
+  _RUN._serialized_end=206
 # @@protoc_insertion_point(module_scope)

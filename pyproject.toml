@@ -9,6 +9,7 @@ python = "3.8"
 meltano = "^1.96.0"
 grpcio = "^1.44.0"
 grpcio-tools = "^1.44.0"
+psycopg2-binary = "^2.9.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.3.1"
