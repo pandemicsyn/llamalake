@@ -7,10 +7,9 @@ from click import ClickException
 from meltano.core.block.blockset import BlockSet, BlockSetValidationError
 from meltano.core.block.parser import BlockParser, validate_block_sets
 from meltano.core.block.plugin_command import PluginCommandBlock
-from meltano.core.logging import setup_logging, OutputLogger
-from meltano.core.project import Project
 from meltano.core.job import JobFinder
-
+from meltano.core.logging import OutputLogger, setup_logging
+from meltano.core.project import Project
 from meltano.core.runner import RunnerError
 from structlog import BoundLogger
 
@@ -21,7 +20,9 @@ logger = structlog.getLogger(__name__)
 
 
 async def _run_blocks(
-    log: BoundLogger, parsed_blocks: List[Union[BlockSet, PluginCommandBlock]], project: Project
+    log: BoundLogger,
+    parsed_blocks: List[Union[BlockSet, PluginCommandBlock]],
+    project: Project,
 ) -> None:
 
     job_results = []
@@ -71,14 +72,13 @@ def trace_id(context: grpc.aio.ServicerContext) -> str:
 
 
 class RunService(pb2_grpc.RunServicer):
-
     def __init__(self, project: Project):
         self.project = project
         logger.info(
             "Found project",
             project=self.project,
             meltano_dir=self.project.meltano_dir(),
-            environment=self.project.active_environment.name
+            environment=self.project.active_environment.name,
         )
 
     async def Submit(
@@ -89,7 +89,9 @@ class RunService(pb2_grpc.RunServicer):
         log.info("Received command", cmd=request)
         blocks = request.blocks.split(" ")
         try:
-            parser = BlockParser(logger, self.project, blocks, request.full_refresh, False, request.force)
+            parser = BlockParser(
+                logger, self.project, blocks, request.full_refresh, False, request.force
+            )
         except ClickException as e:
             log.error(e)
             context.set_details(str(e))
@@ -114,6 +116,7 @@ class RunService(pb2_grpc.RunServicer):
             context.set_details("Validation failed.")
             context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
             return pb2.Result()
+
 
 async def serve(project) -> None:
     server = grpc.aio.server()
