@@ -7,3 +7,4 @@ test:
 
 lint:
 	poetry run black gr tests
+	poetry run isort gr tests

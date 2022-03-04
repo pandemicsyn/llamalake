@@ -7,41 +7,49 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\trun.proto\x12\x02gr"\x1a\n\x07\x43ommand\x12\x0f\n\x07message\x18\x01 \x01(\t"5\n\x0fMessageResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tsubmitted\x18\x02 \x01(\x08\x32\x33\n\x03Run\x12,\n\x06Submit\x12\x0b.gr.Command\x1a\x13.gr.MessageResponse"\x00\x62\x06proto3'
+)
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\trun.proto\x12\x02gr\"\x1a\n\x07\x43ommand\x12\x0f\n\x07message\x18\x01 \x01(\t\"5\n\x0fMessageResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tsubmitted\x18\x02 \x01(\x08\x32\x33\n\x03Run\x12,\n\x06Submit\x12\x0b.gr.Command\x1a\x13.gr.MessageResponse\"\x00\x62\x06proto3')
-
-
-
-_COMMAND = DESCRIPTOR.message_types_by_name['Command']
-_MESSAGERESPONSE = DESCRIPTOR.message_types_by_name['MessageResponse']
-Command = _reflection.GeneratedProtocolMessageType('Command', (_message.Message,), {
-  'DESCRIPTOR' : _COMMAND,
-  '__module__' : 'run_pb2'
-  # @@protoc_insertion_point(class_scope:gr.Command)
-  })
+_COMMAND = DESCRIPTOR.message_types_by_name["Command"]
+_MESSAGERESPONSE = DESCRIPTOR.message_types_by_name["MessageResponse"]
+Command = _reflection.GeneratedProtocolMessageType(
+    "Command",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COMMAND,
+        "__module__": "run_pb2"
+        # @@protoc_insertion_point(class_scope:gr.Command)
+    },
+)
 _sym_db.RegisterMessage(Command)
 
-MessageResponse = _reflection.GeneratedProtocolMessageType('MessageResponse', (_message.Message,), {
-  'DESCRIPTOR' : _MESSAGERESPONSE,
-  '__module__' : 'run_pb2'
-  # @@protoc_insertion_point(class_scope:gr.MessageResponse)
-  })
+MessageResponse = _reflection.GeneratedProtocolMessageType(
+    "MessageResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MESSAGERESPONSE,
+        "__module__": "run_pb2"
+        # @@protoc_insertion_point(class_scope:gr.MessageResponse)
+    },
+)
 _sym_db.RegisterMessage(MessageResponse)
 
-_RUN = DESCRIPTOR.services_by_name['Run']
+_RUN = DESCRIPTOR.services_by_name["Run"]
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-  DESCRIPTOR._options = None
-  _COMMAND._serialized_start=17
-  _COMMAND._serialized_end=43
-  _MESSAGERESPONSE._serialized_start=45
-  _MESSAGERESPONSE._serialized_end=98
-  _RUN._serialized_start=100
-  _RUN._serialized_end=151
+    DESCRIPTOR._options = None
+    _COMMAND._serialized_start = 17
+    _COMMAND._serialized_end = 43
+    _MESSAGERESPONSE._serialized_start = 45
+    _MESSAGERESPONSE._serialized_end = 98
+    _RUN._serialized_start = 100
+    _RUN._serialized_end = 151
 # @@protoc_insertion_point(module_scope)
