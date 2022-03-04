@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "llamalake"
+version = "0.1.0"
+description = ""
+authors = ["Florian Hines <syn@ronin.io>"]
+
+[tool.poetry.dependencies]
+python = "3.8"
+meltano = "^1.96.0"
+grpcio = "^1.44.0"
+grpcio-tools = "^1.44.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^4.3.1"
+asynctest = "^0.12.2"
+black = "21.12b0"
+mypy = "^0.931"
+mock = "^4.0.3"
+pytest-asyncio = "^0.10.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
