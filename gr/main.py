@@ -9,10 +9,15 @@ import run_pb2 as pb2
 
 class RunService(pb2_grpc.RunServicer):
 
+    def __init__(self):
+        self.test = "test"
+
     async def Submit(self, request: pb2.Command, context: grpc.aio.ServicerContext) -> pb2.MessageResponse:
+        logging.info("Received command: %s", request.message)
+        logging.info(self.test)
         return pb2.MessageResponse(
-            message='would execute' % request.message,
-            received=True,
+            message=f"would execute {request.message}",
+            submitted=False,
         )
 
 
