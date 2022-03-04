@@ -4,8 +4,6 @@ from concurrent import futures
 from typing import List, Union
 
 import grpc
-import run_pb2 as pb2
-import run_pb2_grpc as pb2_grpc
 import structlog
 from click import ClickException
 from meltano.core.block.blockset import BlockSet, BlockSetValidationError
@@ -15,16 +13,23 @@ from meltano.core.logging import setup_logging
 from meltano.core.project import Project
 from meltano.core.project_settings_service import ProjectSettingsService
 from meltano.core.runner import RunnerError
+from structlog import BoundLogger
+from structlog.contextvars import bind_contextvars, clear_contextvars
+
+import run_pb2 as pb2
+import run_pb2_grpc as pb2_grpc
 
 logger = structlog.getLogger(__name__)
 
 
-async def _run_blocks(parsed_blocks: List[Union[BlockSet, PluginCommandBlock]]) -> None:
+async def _run_blocks(
+    log: BoundLogger, parsed_blocks: List[Union[BlockSet, PluginCommandBlock]]
+) -> None:
     for idx, blk in enumerate(parsed_blocks):
         try:
             await blk.run()
         except RunnerError as err:
-            logger.error(
+            log.error(
                 "Block run completed.",
                 set_number=idx,
                 block_type=blk.__class__.__name__,
@@ -35,13 +40,20 @@ async def _run_blocks(parsed_blocks: List[Union[BlockSet, PluginCommandBlock]]) 
             raise Exception(
                 f"Run invocation could not be completed as block failed: {err}"
             ) from err
-        logger.info(
+        log.info(
             "Block run completed.",
             set_number=idx,
             block_type=blk.__class__.__name__,
             success=True,
             err=None,
         )
+
+
+def trace_id(context: grpc.aio.ServicerContext) -> str:
+    for k, v in context.invocation_metadata():
+        if k == "x-meltano-trace-id":
+            return v
+    return "no-trace-id"
 
 
 class RunService(pb2_grpc.RunServicer):
@@ -56,29 +68,31 @@ class RunService(pb2_grpc.RunServicer):
     async def Submit(
         self, request: pb2.Command, context: grpc.aio.ServicerContext
     ) -> pb2.MessageResponse:
-        logger.info("Received command", cmd=request.message)
+        log = logger.bind(trace_id=trace_id(context))
+
+        log.info("Received command", cmd=request.message)
         blocks = request.message.split(" ")
         try:
             parser = BlockParser(logger, self.project, blocks, False, True, False)
         except ClickException as e:
-            logging.error(e)
+            log.error(e)
             return pb2.MessageResponse(message=str(e), submitted=False)
 
         try:
             parsed_blocks = list(parser.find_blocks(0))
         except BlockSetValidationError as e:
-            logging.error(e)
+            log.error(e)
             return pb2.MessageResponse(message=str(e), submitted=False)
 
         if not parsed_blocks:
-            logger.info("No valid blocks found.")
+            log.info("No valid blocks found.")
             return pb2.MessageResponse(
                 message=f"No valid blocks found.",
                 submitted=False,
             )
-        if validate_block_sets(logger, parsed_blocks):
-            logger.debug("All ExtractLoadBlocks validated, starting execution.")
-            await _run_blocks(parsed_blocks)
+        if validate_block_sets(log, parsed_blocks):
+            log.debug("All ExtractLoadBlocks validated, starting execution.")
+            await _run_blocks(log, parsed_blocks)
             return pb2.MessageResponse(
                 message=f"All ExtractLoadBlocks validated, starting execution.",
                 submitted=True,
