@@ -1,6 +1,4 @@
 import asyncio
-import logging
-from concurrent import futures
 from typing import List, Union
 
 import grpc
@@ -11,10 +9,8 @@ from meltano.core.block.parser import BlockParser, validate_block_sets
 from meltano.core.block.plugin_command import PluginCommandBlock
 from meltano.core.logging import setup_logging
 from meltano.core.project import Project
-from meltano.core.project_settings_service import ProjectSettingsService
 from meltano.core.runner import RunnerError
 from structlog import BoundLogger
-from structlog.contextvars import bind_contextvars, clear_contextvars
 
 import run_pb2 as pb2
 import run_pb2_grpc as pb2_grpc
