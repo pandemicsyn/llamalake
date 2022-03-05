@@ -2,8 +2,8 @@ import asyncio
 from typing import List, Union
 
 import grpc
-import proto.gr.v1.run_pb2 as pb2
-import proto.gr.v1.run_pb2_grpc as pb2_grpc
+import meltapi.v1.run_pb2 as pb2
+import meltapi.v1.run_pb2_grpc as pb2_grpc
 import structlog
 from click import ClickException
 from meltano.core.block.blockset import BlockSet, BlockSetValidationError

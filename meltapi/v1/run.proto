@@ -1,0 +1,23 @@
+syntax = "proto3";
+package meltapi.v1;
+
+service RunService{
+ rpc Submit(SubmitRequest) returns (SubmitResponse) {}
+}
+
+message SubmitRequest{
+ string blocks = 1;
+ bool full_refresh = 2;
+ bool force = 3;
+}
+
+message SubmitResponse{
+ repeated Job jobs = 2;
+}
+
+message Job{
+ int64 id = 1;
+ string job_id = 2;
+ string state = 3;
+}
+

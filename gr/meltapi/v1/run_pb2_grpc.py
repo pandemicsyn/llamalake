@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from proto.gr.v1 import run_pb2 as proto_dot_gr_dot_v1_dot_run__pb2
+from meltapi.v1 import run_pb2 as meltapi_dot_v1_dot_run__pb2
 
 
 class RunServiceStub(object):
@@ -15,9 +15,9 @@ class RunServiceStub(object):
             channel: A grpc.Channel.
         """
         self.Submit = channel.unary_unary(
-                '/proto.gr.v1.RunService/Submit',
-                request_serializer=proto_dot_gr_dot_v1_dot_run__pb2.SubmitRequest.SerializeToString,
-                response_deserializer=proto_dot_gr_dot_v1_dot_run__pb2.SubmitResponse.FromString,
+                '/meltapi.v1.RunService/Submit',
+                request_serializer=meltapi_dot_v1_dot_run__pb2.SubmitRequest.SerializeToString,
+                response_deserializer=meltapi_dot_v1_dot_run__pb2.SubmitResponse.FromString,
                 )
 
 
@@ -35,12 +35,12 @@ def add_RunServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Submit': grpc.unary_unary_rpc_method_handler(
                     servicer.Submit,
-                    request_deserializer=proto_dot_gr_dot_v1_dot_run__pb2.SubmitRequest.FromString,
-                    response_serializer=proto_dot_gr_dot_v1_dot_run__pb2.SubmitResponse.SerializeToString,
+                    request_deserializer=meltapi_dot_v1_dot_run__pb2.SubmitRequest.FromString,
+                    response_serializer=meltapi_dot_v1_dot_run__pb2.SubmitResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'proto.gr.v1.RunService', rpc_method_handlers)
+            'meltapi.v1.RunService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -59,8 +59,8 @@ class RunService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/proto.gr.v1.RunService/Submit',
-            proto_dot_gr_dot_v1_dot_run__pb2.SubmitRequest.SerializeToString,
-            proto_dot_gr_dot_v1_dot_run__pb2.SubmitResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/meltapi.v1.RunService/Submit',
+            meltapi_dot_v1_dot_run__pb2.SubmitRequest.SerializeToString,
+            meltapi_dot_v1_dot_run__pb2.SubmitResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
