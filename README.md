@@ -1,4 +1,4 @@
-# Project llamalake
+# Project LlamaLake
 
 Catch all repo for all my meltano related explorations and hacks
 
@@ -28,7 +28,18 @@ meltano install
 
 4. Profit!
 
-# gr/
+Tip: run `make` or `make help` to see the available make commands
+
+```bash
+$ make
+generate                       generate the protobuf/grpc files
+lint                           run python and proto linters
+mac-deps                       install mac dependencies - requires brew/pip
+pygen-legacy                   TODO: remove this
+run-gr                         run grpc server
+```
+
+## gr/
 
 A simple GRPC server that allows invoking `meltano run` style commands remotely. 
 
@@ -38,8 +49,39 @@ A simple GRPC server that allows invoking `meltano run` style commands remotely.
 (grpc) ➜ llamalake (main) ✗ python gr/main.py
 ```
 
-### generate python proto files
+### working with proto buf files
+
+This repo uses [buf](https://docs.buf.build/introduction/getting-started/) to build, lint, and generate proto files.
+Currently, only python packages (include mypy hints) are built.
+
+Install deps:
 
 ```
-(grpc) ➜ llamalake (main) ✗ make pygen
+$ brew install protobuf buf
+$ pip install mypy-protobuf
+```
+
+or if you're on MacOS:
+
+```
+make mac-deps
+```
+
+
+### generate proto files
+
+```
+make generate
+```
+
+### lint proto files
+
+```
+$ buf lint
+```
+
+or 
+
+```
+make lint
 ```

@@ -2,10 +2,10 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import run_pb2 as run__pb2
+from proto.gr.v1 import run_pb2 as proto_dot_gr_dot_v1_dot_run__pb2
 
 
-class RunStub(object):
+class RunServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -15,13 +15,13 @@ class RunStub(object):
             channel: A grpc.Channel.
         """
         self.Submit = channel.unary_unary(
-                '/gr.Run/Submit',
-                request_serializer=run__pb2.Command.SerializeToString,
-                response_deserializer=run__pb2.Result.FromString,
+                '/proto.gr.v1.RunService/Submit',
+                request_serializer=proto_dot_gr_dot_v1_dot_run__pb2.SubmitRequest.SerializeToString,
+                response_deserializer=proto_dot_gr_dot_v1_dot_run__pb2.SubmitResponse.FromString,
                 )
 
 
-class RunServicer(object):
+class RunServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def Submit(self, request, context):
@@ -31,21 +31,21 @@ class RunServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_RunServicer_to_server(servicer, server):
+def add_RunServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Submit': grpc.unary_unary_rpc_method_handler(
                     servicer.Submit,
-                    request_deserializer=run__pb2.Command.FromString,
-                    response_serializer=run__pb2.Result.SerializeToString,
+                    request_deserializer=proto_dot_gr_dot_v1_dot_run__pb2.SubmitRequest.FromString,
+                    response_serializer=proto_dot_gr_dot_v1_dot_run__pb2.SubmitResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'gr.Run', rpc_method_handlers)
+            'proto.gr.v1.RunService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class Run(object):
+class RunService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -59,8 +59,8 @@ class Run(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/gr.Run/Submit',
-            run__pb2.Command.SerializeToString,
-            run__pb2.Result.FromString,
+        return grpc.experimental.unary_unary(request, target, '/proto.gr.v1.RunService/Submit',
+            proto_dot_gr_dot_v1_dot_run__pb2.SubmitRequest.SerializeToString,
+            proto_dot_gr_dot_v1_dot_run__pb2.SubmitResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

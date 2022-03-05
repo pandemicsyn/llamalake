@@ -2,6 +2,8 @@ import asyncio
 from typing import List, Union
 
 import grpc
+import proto.gr.v1.run_pb2 as pb2
+import proto.gr.v1.run_pb2_grpc as pb2_grpc
 import structlog
 from click import ClickException
 from meltano.core.block.blockset import BlockSet, BlockSetValidationError
@@ -13,9 +15,6 @@ from meltano.core.project import Project
 from meltano.core.runner import RunnerError
 from structlog import BoundLogger
 
-import run_pb2 as pb2
-import run_pb2_grpc as pb2_grpc
-
 logger = structlog.getLogger(__name__)
 
 
@@ -23,7 +22,7 @@ async def _run_blocks(
     log: BoundLogger,
     parsed_blocks: List[Union[BlockSet, PluginCommandBlock]],
     project: Project,
-) -> None:
+) -> pb2.SubmitResponse:
 
     job_results = []
     for idx, blk in enumerate(parsed_blocks):
@@ -59,7 +58,7 @@ async def _run_blocks(
                 state=str(last.state),
             )
         )
-    result = pb2.Result()
+    result = pb2.SubmitResponse()
     result.jobs.extend(job_results)
     return result
 
@@ -71,7 +70,7 @@ def trace_id(context: grpc.aio.ServicerContext) -> str:
     return "no-trace-id"
 
 
-class RunService(pb2_grpc.RunServicer):
+class RunService(pb2_grpc.RunServiceServicer):
     def __init__(self, project: Project):
         self.project = project
         logger.info(
@@ -82,8 +81,8 @@ class RunService(pb2_grpc.RunServicer):
         )
 
     async def Submit(
-        self, request: pb2.Command, context: grpc.aio.ServicerContext
-    ) -> pb2.Result:
+        self, request: pb2.SubmitRequest, context: grpc.aio.ServicerContext
+    ) -> pb2.SubmitResponse:
         log = logger.bind(trace_id=trace_id(context))
 
         log.info("Received command", cmd=request)
@@ -96,7 +95,7 @@ class RunService(pb2_grpc.RunServicer):
             log.error(e)
             context.set_details(str(e))
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            return pb2.Result()
+            return pb2.SubmitResponse()
 
         try:
             parsed_blocks = list(parser.find_blocks(0))
@@ -104,24 +103,23 @@ class RunService(pb2_grpc.RunServicer):
             log.error(e)
             context.set_details(str(e))
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            return pb2.Result()
+            return pb2.SubmitResponse()
 
         if validate_block_sets(log, parsed_blocks):
             log.debug("All ExtractLoadBlocks validated, starting execution.")
             results = await _run_blocks(log, parsed_blocks, self.project)
-            log.warning("done")
             return results
         else:
             log.error("Validation failed.")
             context.set_details("Validation failed.")
             context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
-            return pb2.Result()
+            return pb2.SubmitResponse()
 
 
 async def serve(project) -> None:
     server = grpc.aio.server()
 
-    pb2_grpc.add_RunServicer_to_server(RunService(project), server)
+    pb2_grpc.add_RunServiceServicer_to_server(RunService(project), server)
     listen_addr = "[::]:50051"
     server.add_insecure_port(listen_addr)
     logger.debug("Starting server", listen_addr=listen_addr)
