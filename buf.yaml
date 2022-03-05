@@ -1,5 +1,5 @@
 version: v1
-name: buf.build/pandemicsyn/gr
+name: buf.build/pandemicsyn/meltapi
 breaking:
   use:
     - FILE

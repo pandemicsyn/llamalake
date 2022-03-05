@@ -51,7 +51,8 @@ A simple GRPC server that allows invoking `meltano run` style commands remotely.
 
 ### working with proto buf files
 
-This repo uses [buf](https://docs.buf.build/introduction/getting-started/) to build, lint, and generate proto files.
+This repo uses [buf](https://docs.buf.build/introduction/getting-started/) to build, lint, and generate proto files. The buf schema registry for this poc can be found at [https://buf.build/pandemicsyn/meltapi](https://buf.build/pandemicsyn/meltapi). It may or may not be up to date (theres no CI/CD setup yet to auto update it). Consulting the proto files directly is your best bet.
+
 Currently, only python packages (include mypy hints) are built.
 
 Install deps:
@@ -71,13 +72,19 @@ make mac-deps
 ### generate proto files
 
 ```
+buf generate
+```
+
+or
+
+```
 make generate
 ```
 
 ### lint proto files
 
 ```
-$ buf lint
+buf lint
 ```
 
 or 

@@ -1,13 +1,17 @@
 syntax = "proto3";
 package meltapi.v1;
 
+// RunService provides a way to execute a `meltano run` like command via GRPC.
 service RunService{
  rpc Submit(SubmitRequest) returns (SubmitResponse) {}
 }
 
 message SubmitRequest{
+ // The blocks to execute e.g. "tap-gitlab some-mapping target-jsonl"
  string blocks = 1;
+ // Whether to perform a full refresh
  bool full_refresh = 2;
+ // Whether to force a run even if a job with the same ID is already running
  bool force = 3;
 }
 
