@@ -2,36 +2,34 @@
 
 GRPC , Protobuf, Mysql, all the random things I learned. 
 
-### project repo
+### links
 
-https://gitlab.com/pandemicsyn/llamalake/
+[project repo](https://gitlab.com/pandemicsyn/llamalake/)
 
-### these slides (raw form)
-
-https://gitlab.com/pandemicsyn/llamalake/-/blob/main/slides.md
-
----
-
-## My criteria for success
-
-✔ From my local console fire a GRPC message at a remote service (running in docker, or a remote vm)
-
-✔ Have the remote service return a message confirming submission, or an error if the parsing fails (i.e. you ask it to do a remote meltano run tap tap target)
-
-✔ Have the remote service perform the meltano run call using `meltano.core` NOT simply invoking the meltano cli.
-
-✔ Have the remote service finish the meltano run and log the result to the remote console or a remote log file.
+[slides (raw form)](https://gitlab.com/pandemicsyn/llamalake/-/blob/main/slides.md)
 
 
-## Bonus content
+```
+ _________________________
+ < Llamalake > Datalake  >
+ -------------------------
+             O
+              O
+               o
+                \||/
+                |  @___oo
+      /\  /\   / (__,,,,|
+     ) /^\) ^\/ _)
+     )   /^\/   _)
+     )   _ /  / _)
+ /\  )/\/ ||  | )_)
+<  >      |(,,) )__)
+ ||      /    \)___)\
+ | \____(      )___) )___
+  \______(_______;;; __;;;
+```
 
-✔ Remote service returns job info
 
-~~Use GRPC streaming to stream the logs back to the client in real time.~~
-
-x Planetscale for a meltano.db
-
-✔ Evaluate [buf](https://buf.build) and publish the schema to the public registry
 
 
 ---
@@ -78,7 +76,7 @@ meltapi.v1.RunService/Submit
 And errors get bubbled up too, like plugins that's aren't installed:
 
 ```bash
-➜ grpcurl -d '{"blocks": "what-even-is-this"}' \
+grpcurl -d '{"blocks": "what-even-is-this"}' \
      -proto run.proto \
      -import-path /home/syn/projects/llamalake/meltapi/v1 \
      -plaintext localhost:50051 \
@@ -96,7 +94,7 @@ ERROR:
 And bad invocation orders:
 
 ```bash
-➜ grpcurl -d '{"blocks": "target-jsonl tap-gitlab"}' \
+grpcurl -d '{"blocks": "target-jsonl tap-gitlab"}' \
      -proto run.proto \
      -import-path /home/syn/projects/llamalake/meltapi/v1 \
      -plaintext localhost:50051 \
@@ -116,6 +114,131 @@ ERROR:
 - A *ver smoll, much wow* python server
 - Seriously, thats it
 
+You start with `run.proto`...
+
+```protobuf
+syntax = "proto3";
+package meltapi.v1;
+
+// RunService provides a way to execute a `meltano run` like command via GRPC.
+service RunService{
+ rpc Submit(SubmitRequest) returns (SubmitResponse) {}
+}
+
+message SubmitRequest{
+ // The blocks to execute e.g. "tap-gitlab some-mapping target-jsonl"
+ string blocks = 1;
+ // Whether to perform a full refresh
+ bool full_refresh = 2;
+ // Whether to force a run even if a job with the same ID is already running
+ bool force = 3;
+}
+
+message SubmitResponse{
+ repeated Job jobs = 1;
+}
+
+message Job{
+ int64 id = 1;
+ string job_id = 2;
+ string state = 3;
+}
+```
+
+
+---
+
+## How's this work.
+
+- GRPC Stubs and protobuf
+- A *ver smoll, much wow* python server
+- Seriously, thats it
+
+
+...and after a `buf generate*` end up with
+
+
+```tree
+gr
+├── __init__.py
+├── main.py    <---- our server that we wrote to satisfy the stubs
+└── meltapi
+    └── v1
+        ├── run_pb2.py      <-- "python" for our protobuf schema
+        ├── run_pb2.pyi     <-- type hints 
+        └── run_pb2_grpc.py <-- python grpc stubs for clients and services
+```
+
+Next step is to satisfy the service stubs...
+
+*more on `buf` coming up
+
+---
+
+## How's this work.
+
+- GRPC Stubs and protobuf
+- A *ver smoll, much wow* python server
+- Seriously, thats it
+
+```python
+class RunService(pb2_grpc.RunServiceServicer):
+    def __init__(self, project: Project):
+        self.project = project
+        logger.info(
+            "Found project",
+            project=self.project,
+            meltano_dir=self.project.meltano_dir(),
+            environment=self.project.active_environment.name,
+        )
+
+    async def Submit(
+        self, request: pb2.SubmitRequest, context: grpc.aio.ServicerContext
+    ) -> pb2.SubmitResponse:
+        log = logger.bind(trace_id=trace_id(context))
+
+        blocks = request.blocks.split(" ")
+        try:
+            parser = BlockParser(
+                logger, self.project, blocks, request.full_refresh, False, request.force
+            )
+        except ClickException as e:
+            context.set_details(str(e))
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            return pb2.SubmitResponse()
+
+        try:
+            parsed_blocks = list(parser.find_blocks(0))
+        except BlockSetValidationError as e:
+            context.set_details(str(e))
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            return pb2.SubmitResponse()
+
+        if validate_block_sets(log, parsed_blocks):
+            log.debug("All ExtractLoadBlocks validated, starting execution.")
+            results = await _run_blocks(log, parsed_blocks, self.project)
+            return results
+        else:
+            context.set_details("Validation failed.")
+            context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
+            return pb2.SubmitResponse()
+
+async def serve(project) -> None:
+    server = grpc.aio.server()
+    pb2_grpc.add_RunServiceServicer_to_server(RunService(project), server)
+    listen_addr = "[::]:50051"
+    server.add_insecure_port(listen_addr)
+    await server.start()
+    await server.wait_for_termination()
+
+
+if __name__ == "__main__":
+    project = Project.find()
+    project.activate_environment("dev")
+    asyncio.run(serve(project))
+
+```
+
 ---
 
 ## How's this work.
@@ -130,17 +253,40 @@ ERROR:
 - theres mypy protobuf plugin \o/
 - [open-tracing](https://github.com/opentracing-contrib/python-grpc) support looks like its g2g.
 - python grpc has some quirks
-  - interceptor's status is confusing. Random posts indicating its not implemented as it was spec'd. Some helper lib's exist: https://grpc-interceptor.readthedocs.io/en/latest/ , but mostly fine
+  - interceptor's status is confusing. Random posts indicating its not implemented as it was spec'd
   - repeated values  (can't assign directly, extend/append) 
   - asyncio version technically still beta but "stable" api sig
-- Have some "ClickExceptions" too far back (mostly in parser) that should not be ClickExceptions.
-- couple of log lines reference "cli" but are actually agnostic
-- really need the ability to turn off the ETL log for jobs and a more generic way to hook in custom IO.
-- fork() complaints ? not sure whats up. GIL still a problem because python gonna python
+- Some meltano.core improvements:
+  - Have some "ClickExceptions" too far back (mostly in parser) that should not be ClickExceptions
+  - couple of log lines reference the cli but are actually agnostic
+  - really need the ability to turn off the ETL log for jobs
+- fork() complaints ? not sure whats up
+- GIL still a problem because python gonna python
 
 ---
 
-### What did I learn - mysql/planetscale
+## My criteria for success
+
+✔ From my local console fire a GRPC message at a remote service (running in docker, or a remote vm)
+
+✔ Have the remote service return a message confirming submission, or an error if the parsing fails (i.e. you ask it to do a remote meltano run tap tap target)
+
+✔ Have the remote service perform the meltano run call using `meltano.core` NOT simply invoking the meltano cli.
+
+✔ Have the remote service finish the meltano run and log the result to the remote console or a remote log file.
+
+
+## Bonus content
+
+✔ Remote service returns job info
+
+~~Use GRPC streaming to stream the logs back to the client in real time.~~
+
+x Planetscale for a meltano.db
+
+✔ Evaluate [buf](https://buf.build) and publish the schema to the public registry
+
+### Bonus content - mysql/planetscale
 
 ## Meltano + Planetscale: :((((
 
@@ -150,7 +296,7 @@ Very small decisions can enable a larger eco system's. Fine to be opinionated an
 
 ---
 
-### What did I learn - bonus content
+### Bonus content - buf
 
 ## buf - https://buf.build 
 
@@ -162,4 +308,3 @@ Very small decisions can enable a larger eco system's. Fine to be opinionated an
 - A++ would use again
 
 Seriously, super awesome project and cli just hit v1 (raised $93 million to fix protobuf 🤯) 
-
