@@ -29,9 +29,6 @@ GRPC , Protobuf, Mysql, all the random things I learned.
   \______(_______;;; __;;;
 ```
 
-
-
-
 ---
 
 ## First things first - wtf did I build. 
@@ -159,6 +156,7 @@ message Job{
 
 
 ```tree
+
 gr
 ├── __init__.py
 ├── main.py    <---- our server that we wrote to satisfy the stubs
@@ -167,7 +165,16 @@ gr
         ├── run_pb2.py      <-- "python" for our protobuf schema
         ├── run_pb2.pyi     <-- type hints 
         └── run_pb2_grpc.py <-- python grpc stubs for clients and services
+gen
+└── proto
+    └── go
+        └── meltapi
+            └── v1
+                ├── run.pb.go      <-- Go types for our protobuf schema
+                └── run_grpc.pb.go <-- Go grpc stubs for clients and services
 ```
+
+Big take away: we can generate clients and lang specific types for python, Go, JS, etc etc
 
 Next step is to satisfy the service stubs...
 
@@ -181,63 +188,9 @@ Next step is to satisfy the service stubs...
 - A *ver smoll, much wow* python server
 - Seriously, thats it
 
-```python
-class RunService(pb2_grpc.RunServiceServicer):
-    def __init__(self, project: Project):
-        self.project = project
-        logger.info(
-            "Found project",
-            project=self.project,
-            meltano_dir=self.project.meltano_dir(),
-            environment=self.project.active_environment.name,
-        )
+#### Ver smoll - server
 
-    async def Submit(
-        self, request: pb2.SubmitRequest, context: grpc.aio.ServicerContext
-    ) -> pb2.SubmitResponse:
-        log = logger.bind(trace_id=trace_id(context))
-
-        blocks = request.blocks.split(" ")
-        try:
-            parser = BlockParser(
-                logger, self.project, blocks, request.full_refresh, False, request.force
-            )
-        except ClickException as e:
-            context.set_details(str(e))
-            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            return pb2.SubmitResponse()
-
-        try:
-            parsed_blocks = list(parser.find_blocks(0))
-        except BlockSetValidationError as e:
-            context.set_details(str(e))
-            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            return pb2.SubmitResponse()
-
-        if validate_block_sets(log, parsed_blocks):
-            log.debug("All ExtractLoadBlocks validated, starting execution.")
-            results = await _run_blocks(log, parsed_blocks, self.project)
-            return results
-        else:
-            context.set_details("Validation failed.")
-            context.set_code(grpc.StatusCode.FAILED_PRECONDITION)
-            return pb2.SubmitResponse()
-
-async def serve(project) -> None:
-    server = grpc.aio.server()
-    pb2_grpc.add_RunServiceServicer_to_server(RunService(project), server)
-    listen_addr = "[::]:50051"
-    server.add_insecure_port(listen_addr)
-    await server.start()
-    await server.wait_for_termination()
-
-
-if __name__ == "__main__":
-    project = Project.find()
-    project.activate_environment("dev")
-    asyncio.run(serve(project))
-
-```
+~130 lines , including white space and log lines. By no means production ready but pretty dang small!
 
 ---
 
@@ -247,11 +200,15 @@ if __name__ == "__main__":
 - A *ver smoll, much wow* python server
 - Seriously, thats it
 
+#### Ver smoll - server
+
+~130 lines , including white space and log lines. By no means production ready but pretty dang small!
+
+
 ## learnings
 
-- easiest part of the day! not having complex logic in `meltano.cli.run` paid off.
-- theres mypy protobuf plugin \o/
-- [open-tracing](https://github.com/opentracing-contrib/python-grpc) support looks like its g2g.
+- easiest part of the day! not having complex logic in `meltano.cli.run` paid off
+- [open-tracing](https://github.com/opentracing-contrib/python-grpc) support looks like its g2g
 - python grpc has some quirks
   - interceptor's status is confusing. Random posts indicating its not implemented as it was spec'd
   - repeated values  (can't assign directly, extend/append) 
@@ -278,27 +235,29 @@ if __name__ == "__main__":
 
 ## Bonus content
 
-✔ Remote service returns job info
-
 ~~Use GRPC streaming to stream the logs back to the client in real time.~~
 
 x Planetscale for a meltano.db
 
 ✔ Evaluate [buf](https://buf.build) and publish the schema to the public registry
 
+---
+
 ### Bonus content - mysql/planetscale
 
-## Meltano + Planetscale: :((((
+#### ☠️  Meltano + Planetscale ☠️
 
-Probably just need to define some max string lengths in our migrations (some do, some don't). String() -> Varchar , and in MySQL land varchar's need a max length. 
+Dead on arrival, initial create table's fail.
 
-Very small decisions can enable a larger eco system's. Fine to be opinionated and primarily focused on $ONE_TECH, but if we should exclude a tech/stack let's do so intentionally. 
+- Probably just need to define some max string lengths in our migrations (sometimes we do, sometimes we don't)
+  - In sqlalchemy `String()` -> `Varchar`  for MySQL, and in MySQL land varchar's need a max length. 
+- Maybe other stuff, gave up pretty quickly
 
 ---
 
 ### Bonus content - buf
 
-## buf - https://buf.build 
+##### buf - https://buf.build 
 
 >The Buf CLI is a one stop shop for your local Protocol Buffers needs
 
@@ -307,4 +266,10 @@ Very small decisions can enable a larger eco system's. Fine to be opinionated an
 - buf schema registry interesting - [meltapi](https://buf.build/pandemicsyn/meltapi)
 - A++ would use again
 
-Seriously, super awesome project and cli just hit v1 (raised $93 million to fix protobuf 🤯) 
+Seriously, super awesome project and cli just hit v1 (raised $93 million to fix protobuf 🤯). Makes protobuf a way better dev experience than in past.
+
+---
+
+# Questions ?
+
+

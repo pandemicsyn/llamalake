@@ -6,7 +6,8 @@ from meltapi.v1 import run_pb2 as meltapi_dot_v1_dot_run__pb2
 
 
 class RunServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """RunService provides a way to execute a `meltano run` like command via GRPC.
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -22,7 +23,8 @@ class RunServiceStub(object):
 
 
 class RunServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """RunService provides a way to execute a `meltano run` like command via GRPC.
+    """
 
     def Submit(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -46,7 +48,8 @@ def add_RunServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class RunService(object):
-    """Missing associated documentation comment in .proto file."""
+    """RunService provides a way to execute a `meltano run` like command via GRPC.
+    """
 
     @staticmethod
     def Submit(request,

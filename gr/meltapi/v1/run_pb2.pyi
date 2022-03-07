@@ -17,8 +17,14 @@ class SubmitRequest(google.protobuf.message.Message):
     FULL_REFRESH_FIELD_NUMBER: builtins.int
     FORCE_FIELD_NUMBER: builtins.int
     blocks: typing.Text
+    """The blocks to execute e.g. "tap-gitlab some-mapping target-jsonl" """
+
     full_refresh: builtins.bool
+    """Whether to perform a full refresh"""
+
     force: builtins.bool
+    """Whether to force a run even if a job with the same ID is already running"""
+
     def __init__(self,
         *,
         blocks: typing.Text = ...,

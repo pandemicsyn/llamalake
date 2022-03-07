@@ -1,6 +1,8 @@
 version: v1
 managed:
   enabled: true
+  go_package_prefix:
+    default: gitlab.com/pandemicsyn/llamalake/gen/proto/go
 plugins:
   - remote: buf.build/protocolbuffers/plugins/python:v3.19.1-1
     out: gr
@@ -8,7 +10,6 @@ plugins:
     out: gr
   - name: mypy
     out: gr
- version: v1
   - name: go
     out: gen/proto/go
     opt: paths=source_relative
