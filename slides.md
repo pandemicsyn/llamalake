@@ -47,8 +47,8 @@ We can execute a run as usual:
 ```bash
 grpcurl -d '{"blocks": "tap-gitlab hide-gitlab-secrets target-jsonl", "force": false, "full_refresh": true}' \
 -proto run.proto \
--import-path /home/syn/projects/llamalake/meltapi/v1 \
--plaintext localhost:50051 \
+-import-path ~/projects/llamalake/meltapi/v1 \
+-plaintext dev:50051 \
 meltapi.v1.RunService/Submit
 ```
 ---
@@ -56,13 +56,13 @@ meltapi.v1.RunService/Submit
 
 ## In action
 
-And of course multiple blocks work fine too
+And of course multiple blocks work fine too:
 
 ```bash
-grpcurl -d '{"blocks": "tap-gitlab hide-gitlab-secrets target-jsonl tap-gitlab hide-gitlab-secrets target-jsonl"}' \
+grpcurl -d '{"blocks": "tap-gitlab target-jsonl tap-gitlab target-jsonl"}' \
 -proto run.proto \
--import-path /home/syn/projects/llamalake/meltapi/v1 \
--plaintext localhost:50051 \
+-import-path ~/projects/llamalake/meltapi/v1 \
+-plaintext dev:50051 \
 meltapi.v1.RunService/Submit
 ```
 
@@ -75,8 +75,8 @@ And errors get bubbled up too, like plugins that's aren't installed:
 ```bash
 grpcurl -d '{"blocks": "what-even-is-this"}' \
      -proto run.proto \
-     -import-path /home/syn/projects/llamalake/meltapi/v1 \
-     -plaintext localhost:50051 \
+     -import-path ~/projects/llamalake/meltapi/v1 \
+     -plaintext dev:50051 \
      meltapi.v1.RunService/Submit
 ```
 ```
@@ -93,8 +93,8 @@ And bad invocation orders:
 ```bash
 grpcurl -d '{"blocks": "target-jsonl tap-gitlab"}' \
      -proto run.proto \
-     -import-path /home/syn/projects/llamalake/meltapi/v1 \
-     -plaintext localhost:50051 \
+     -import-path ~/projects/llamalake/meltapi/v1 \
+     -plaintext dev:50051 \
      meltapi.v1.RunService/Submit
 ```
 ```
