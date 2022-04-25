@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "generate-client": "openapi --input http://localhost:8000/openapi.json --output ./src/client --client axios"
+  },
+  "devDependencies": {
+    "openapi-typescript-codegen": "^0.21.0"
+  }
+}

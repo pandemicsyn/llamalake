@@ -25,6 +25,15 @@ pygen-legacy:  ## TODO: remove this
 run-gr: ## run grpc server
 	python gr/main.py
 
+fmelty-run: ## run the fastapi based server
+	uvicorn fmelty.main:app --reload
+
 mac-deps: ## install mac dependencies - requires brew/pip
+	poetry install
 	brew install protobuf buf
 	pip install mypy-protobuf
+
+fmelty-generate: ## generate the typescript client for the fastapi based server
+	npm run generate-client
+
+
